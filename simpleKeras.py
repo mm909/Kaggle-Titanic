@@ -9,7 +9,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import StratifiedKFold
 import matplotlib.pyplot as plt
 
-TRAIN = False
+TRAIN = True
 
 titanic = pd.read_csv("data/train.csv")
 titanicTEST = pd.read_csv("data/test.csv")
@@ -96,21 +96,22 @@ if TRAIN:
     print("Validation : %.2f%% (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
     print("Bias       : %.2f%%" % (95-np.mean(accscores)))
     print("Variance   : %.2f%%" % (abs(np.mean(accscores)-np.mean(cvscores))))
+else:
+    model = keras.models.Sequential([
+        keras.layers.InputLayer(7),
+        keras.layers.Dense(1000, activation='relu'),
+        keras.layers.Dropout(0.2),
+        keras.layers.Dense(500, activation='relu'),
+        keras.layers.Dropout(0.1),
+        keras.layers.Dense(200, activation='relu'),
+        keras.layers.Dropout(0.1),
+        keras.layers.Dense(1, activation='sigmoid')
+    ])
 
-model = keras.models.Sequential([
-    keras.layers.InputLayer(7),
-    keras.layers.Dense(1000, activation='relu'),
-    keras.layers.Dropout(0.2),
-    keras.layers.Dense(500, activation='relu'),
-    keras.layers.Dropout(0.1),
-    keras.layers.Dense(200, activation='relu'),
-    keras.layers.Dropout(0.1),
-    keras.layers.Dense(1, activation='sigmoid')
-])
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    print("Training Final Model...")
+    model.fit(titanic_data, titanic_labels, epochs=80, verbose=0)
 
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-print("Training Final Model...")
-model.fit(titanic_data, titanic_labels, epochs=80, verbose=0)
 print("Predictions...")
 preds = model.predict(titanic_dataTEST)
 preds = preds > 0.5
