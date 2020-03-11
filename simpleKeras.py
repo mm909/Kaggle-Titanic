@@ -3,6 +3,7 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OrdinalEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
@@ -16,21 +17,34 @@ titanicTEST = pd.read_csv("data/test.csv")
 
 # titanic = titanic.sample(frac=1).reset_index(drop=True)
 
+# # Encode Sex into Male and Female cats
+# sexes = titanic[["Sex"]]
+# hotEncoder = OneHotEncoder()
+# sexes_hot = hotEncoder.fit_transform(sexes)
+# sexes_hot = sexes_hot.toarray()
+# titanic["Female"] = sexes_hot[:,0]
+# titanic["Male"] = sexes_hot[:,1]
+#
+# # Encode Sex into Male and Female cats
+# sexesTEST = titanicTEST[["Sex"]]
+# hotEncoderTEST = OneHotEncoder()
+# sexes_hotTEST = hotEncoderTEST.fit_transform(sexesTEST)
+# sexes_hotTEST = sexes_hotTEST.toarray()
+# titanicTEST["Female"] = sexes_hotTEST[:,0]
+# titanicTEST["Male"] = sexes_hotTEST[:,1]
+
 # Encode Sex into Male and Female cats
 sexes = titanic[["Sex"]]
-hotEncoder = OneHotEncoder()
+hotEncoder = OrdinalEncoder()
 sexes_hot = hotEncoder.fit_transform(sexes)
-sexes_hot = sexes_hot.toarray()
-titanic["Female"] = sexes_hot[:,0]
-titanic["Male"] = sexes_hot[:,1]
+titanic["Sex_new"] = sexes_hot
+
 
 # Encode Sex into Male and Female cats
 sexesTEST = titanicTEST[["Sex"]]
-hotEncoderTEST = OneHotEncoder()
+hotEncoderTEST = OrdinalEncoder()
 sexes_hotTEST = hotEncoderTEST.fit_transform(sexesTEST)
-sexes_hotTEST = sexes_hotTEST.toarray()
-titanicTEST["Female"] = sexes_hotTEST[:,0]
-titanicTEST["Male"] = sexes_hotTEST[:,1]
+titanicTEST["Sex_new"] = sexes_hotTEST
 
 # Drop data that is not needed
 drop = ["PassengerId", "Name", "Sex", "Cabin", "Ticket", "Embarked"]
@@ -74,7 +88,7 @@ if TRAIN:
     for train, test in kfold.split(titanic_data, titanic_labels):
         # create model
         model = keras.models.Sequential([
-            keras.layers.InputLayer(7),
+            keras.layers.InputLayer(6),
             keras.layers.Dense(1000, activation='relu'),
             keras.layers.Dropout(0.2),
             keras.layers.Dense(500, activation='relu'),
